@@ -1,7 +1,7 @@
 #ifndef __NETSTRING_STREAM_H
 #define __NETSTRING_STREAM_H
 
-int read_netstring(char *buffer, size_t buffer_length,
+int netstring_read(char *buffer, size_t buffer_length,
 		   char **netstring_start, size_t *netstring_length);
 
 /* Errors that can occur during netstring parsing */

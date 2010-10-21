@@ -25,9 +25,9 @@
    D. J. Bernstein's reference implementation.
 
    Example:
-      if (read_netstring("3:foo,", 6, &str, &len) < 0) explode_and_die();
+      if (netstring_read("3:foo,", 6, &str, &len) < 0) explode_and_die();
  */
-int read_netstring(char *buffer, size_t buffer_length,
+int netstring_read(char *buffer, size_t buffer_length,
 		   char **netstring_start, size_t *netstring_length) {
   int i;
   size_t len = 0;
