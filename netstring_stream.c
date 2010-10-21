@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "netstring_stream.h"
 
 /* Reads a netstring from a `buffer` of length `buffer_length`. Writes
@@ -66,4 +67,11 @@ int netstring_read(char *buffer, size_t buffer_length,
   *netstring_start = &buffer[i]; *netstring_length = len;
 
   return 0;
+}
+
+/* Return the length, in ASCII characters, of a netstring containing
+   `data_length` bytes. */
+size_t netstring_buffer_size(size_t data_length) {
+  if (data_length == 0) return 3;
+  return (size_t)ceil(log10((double)data_length + 1)) + data_length + 2;
 }

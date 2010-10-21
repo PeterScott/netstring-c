@@ -80,11 +80,19 @@ void test_netstring_read(void) {
   assert(retval == NETSTRING_ERROR_NO_LENGTH);
 }
 
-
+void test_netstring_buffer_size(void) {
+  assert(netstring_buffer_size(0) == 3);
+  assert(netstring_buffer_size(1) == 4);
+  assert(netstring_buffer_size(2) == 5);
+  assert(netstring_buffer_size(9) == 12);
+  assert(netstring_buffer_size(10) == 14);
+  assert(netstring_buffer_size(12345) == 12345 + 5 + 2);
+}
   
 int main(void) {
   printf("Running test suite...\n");
   test_netstring_read();
+  test_netstring_buffer_size();
   printf("All tests passed!\n");
   return 0;
 }
