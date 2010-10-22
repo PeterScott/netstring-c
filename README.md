@@ -52,7 +52,7 @@ To create a netstring, there are a few ways to do it. You could do something rea
     if (printf("%lu:", len) < 0) barf();
     if (fwrite(buf, 1, len, stdout) < len) barf();
     if (putchar(',') < 0) barf();
-
+    
 This code provides a convenience function for creating a new netstring:
 
      size_t netstring_encode_new(char **netstring, char *data, size_t len);
