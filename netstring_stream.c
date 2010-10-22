@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 #include <math.h>
 #include "netstring_stream.h"
 
@@ -75,3 +77,28 @@ size_t netstring_buffer_size(size_t data_length) {
   if (data_length == 0) return 3;
   return (size_t)ceil(log10((double)data_length + 1)) + data_length + 2;
 }
+
+/* Allocate and create a netstring containing the first `len` bytes of
+   `string`. This must be manually freed by the client. If `len` is 0
+   then no data will be read from `string`, and it may be NULL. */
+size_t netstring_encode_new(char **netstring, char *data, size_t len) {
+  char *ns;
+  size_t num_len = 1;
+
+  if (len == 0) {
+    ns = malloc(3);
+    ns[0] = '0';
+    ns[1] = ':';
+    ns[2] = ',';
+  } else {
+    num_len = (size_t)ceil(log10((double)len + 1));
+    ns = malloc(num_len + len + 2);
+    sprintf(ns, "%lu:", (unsigned long)len);
+    memcpy(ns + num_len + 1, data, len);
+    ns[num_len + len + 1] = ',';
+  }
+
+  *netstring = ns;
+  return num_len + len + 2;
+}
+  

@@ -1,3 +1,5 @@
+CFLAGS = -O2 -Wall
+
 .PHONY: test clean
 
 all: testsuite

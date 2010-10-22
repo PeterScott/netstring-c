@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
@@ -22,7 +23,7 @@ char ex9[] = ":what's up";		  /* No number */
 void test_netstring_read(void) {
   char *netstring;
   size_t netstring_len;
-  int i, retval;
+  int retval;
 
   /* ex1: hello world */
   retval = netstring_read(ex1, strlen(ex1), &netstring, &netstring_len);
@@ -88,11 +89,28 @@ void test_netstring_buffer_size(void) {
   assert(netstring_buffer_size(10) == 14);
   assert(netstring_buffer_size(12345) == 12345 + 5 + 2);
 }
-  
+
+void test_netstring_encode_new(void) {
+  char *ns; size_t bytes;
+
+  bytes = netstring_encode_new(&ns, "foo", 3);
+  assert(ns != NULL); assert(strncmp(ns, "3:foo,", 6) == 0);
+  free(ns);
+
+  bytes = netstring_encode_new(&ns, NULL, 0);
+  assert(ns != NULL); assert(strncmp(ns, "0:,", 3) == 0);
+  free(ns);
+
+  bytes = netstring_encode_new(&ns, "hello world!", 12);
+  assert(ns != NULL); assert(strncmp(ns, "12:hello world!,", 16) == 0);
+  free(ns);
+}  
+
 int main(void) {
   printf("Running test suite...\n");
   test_netstring_read();
   test_netstring_buffer_size();
+  test_netstring_encode_new();
   printf("All tests passed!\n");
   return 0;
 }
