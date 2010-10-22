@@ -79,8 +79,8 @@ size_t netstring_buffer_size(size_t data_length) {
 }
 
 /* Allocate and create a netstring containing the first `len` bytes of
-   `string`. This must be manually freed by the client. If `len` is 0
-   then no data will be read from `string`, and it may be NULL. */
+   `data`. This must be manually freed by the client. If `len` is 0
+   then no data will be read from `data`, and it may be NULL. */
 size_t netstring_encode_new(char **netstring, char *data, size_t len) {
   char *ns;
   size_t num_len = 1;
