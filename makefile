@@ -4,7 +4,7 @@ CFLAGS = -O2 -Wall
 
 all: testsuite
 
-testsuite: testsuite.c netstring_stream.o
+testsuite: testsuite.c netstring.o
 
 test: testsuite
 	./testsuite

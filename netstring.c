@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <math.h>
-#include "netstring_stream.h"
+#include "netstring.h"
 
 /* Reads a netstring from a `buffer` of length `buffer_length`. Writes
    to `netstring_start` a pointer to the beginning of the string in

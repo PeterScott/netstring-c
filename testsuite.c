@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "netstring_stream.h"
+#include "netstring.h"
 
 
 /* Good examples */
