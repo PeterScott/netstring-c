@@ -94,14 +94,14 @@ void test_netstring_encode_new(void) {
   char *ns; size_t bytes;
 
   bytes = netstring_encode_new(&ns, "foo", 3);
-  assert(ns != NULL); assert(strncmp(ns, "3:foo,", 6) == 0);
+  assert(ns != NULL); assert(strncmp(ns, "3:foo,", 6) == 0); assert(bytes == 6);
   free(ns);
 
   bytes = netstring_encode_new(&ns, NULL, 0);
-  assert(ns != NULL); assert(strncmp(ns, "0:,", 3) == 0);
+  assert(ns != NULL); assert(strncmp(ns, "0:,", 3) == 0); assert(bytes == 3);
   free(ns);
 
-  bytes = netstring_encode_new(&ns, "hello world!", 12);
+  bytes = netstring_encode_new(&ns, "hello world!", 12); assert(bytes == 16);
   assert(ns != NULL); assert(strncmp(ns, "12:hello world!,", 16) == 0);
   free(ns);
 }  
