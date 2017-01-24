@@ -91,6 +91,35 @@ The extended version `netstring_add_ex` accepts a string length as the last argu
 
      int netstring_add_ex(char **list, char *str, int len);
 
+Message Framing on stream-based connections (sockets, pipes...)
+---------------------------------------------------------------
+
+On stream-based connections the messages can arrive coalesced or fragmented.
+
+Here is an example of reading those messages using netstring for message framing:
+
+    char buffer[1024], *buffer_base, *str;
+    int bytes_read, buffer_used = 0, len;
+
+    while(1) {
+        /* read data from socket */
+        bytes_read = recv(sock, &buffer[buffer_used], sizeof(buffer) - buffer_used);
+        if (bytes_read < 0) break; if (bytes_read == 0) continue;
+        buffer_used += bytes_read;
+
+        /* parse the strings from the read buffer */
+        buffer_base = buffer;
+        while(netstring_read(&buffer_base, &buffer_used, &str, &len) == 0) {
+          do_something(str, len);
+        }
+
+        /* if there are remaining bytes, move to the beggining of buffer */
+        if (buffer_base > buffer && buffer_used > 0)
+          memmove(buffer, buffer_base, buffer_used);
+    }
+
+Note: this example is lacking error checking from netstring_read function and it does not allocate memory for bigger messages.
+
 Contributing
 ------------
 
