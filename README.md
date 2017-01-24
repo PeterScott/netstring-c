@@ -22,7 +22,7 @@ All the code is in `netstring.c` and `netstring.h`, and these have no external d
 
 To parse a netstring, use `netstring_read()`.
 
-    int netstring_read(char *buffer, size_t buffer_length,
+    int netstring_read(char **buffer, size_t *buffer_length,
                        char **netstring_start, size_t *netstring_length);
 
 Reads a netstring from a `buffer` of length `buffer_length`. Writes to
@@ -38,6 +38,23 @@ values are:
     NETSTRING_ERROR_NO_COMMA      No comma was found at the end
     NETSTRING_ERROR_LEADING_ZERO  Leading zeros are not allowed
     NETSTRING_ERROR_NO_LENGTH     Length not given at start of netstring
+
+Example:
+
+    char  *str, *base = buffer;
+    size_t len,  size = bytes_read;
+
+    while(netstring_read(&base, &size, &str, &len) == 0) {
+      do_something(str, len);
+    }
+
+We can replace the comma with a null terminator when reading:
+
+    while(netstring_read(&base, &size, &str, &len) == 0) {
+      str[len] = 0;
+      puts(str);
+      str[len] = ',';   /* and optionally restore it */
+    }
 
 If you're sending messages with more than 999999999 bytes -- about 2
 GB -- then you probably should not be doing so in the form of a single

@@ -30,10 +30,12 @@
    Example:
       if (netstring_read("3:foo,", 6, &str, &len) < 0) explode_and_die();
  */
-int netstring_read(char *buffer, size_t buffer_length,
+int netstring_read(char **pbuffer, size_t *pbuffer_length,
 		   char **netstring_start, size_t *netstring_length) {
   int i;
   size_t len = 0;
+  char *buffer = *pbuffer;
+  size_t buffer_length = *pbuffer_length;
 
   /* Write default values for outputs */
   *netstring_start = NULL; *netstring_length = 0;
@@ -64,9 +66,14 @@ int netstring_read(char *buffer, size_t buffer_length,
   /* Read the colon */
   if (buffer[i++] != ':') return NETSTRING_ERROR_NO_COLON;
   
-  /* Test for the trailing comma, and set the return values */
+  /* Test for the trailing comma */
   if (buffer[i + len] != ',') return NETSTRING_ERROR_NO_COMMA;
-  *netstring_start = &buffer[i]; *netstring_length = len;
+
+  /* Set the return values */
+  *netstring_start = &buffer[i];
+  *netstring_length = len;
+  *pbuffer = *netstring_start + len + 1;
+  *pbuffer_length = buffer_length - (i + len + 1);
 
   return 0;
 }

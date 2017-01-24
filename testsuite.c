@@ -21,62 +21,75 @@ char ex9[] = ":what's up";		  /* No number */
 
 
 void test_netstring_read(void) {
-  char *netstring;
+  char  *base;
+  size_t base_len;
+  char  *netstring;
   size_t netstring_len;
   int retval;
 
   /* ex1: hello world */
-  retval = netstring_read(ex1, strlen(ex1), &netstring, &netstring_len);
+  base = ex1; base_len = strlen(ex1);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 12); assert(strncmp(netstring, "hello world!", 12) == 0);
+  assert(base == ex1 + strlen(ex1)); assert(base_len == 0);
   assert(retval == 0);
 
 
   /* ex2: three netstrings, concatenated. */
 
-  retval = netstring_read(ex2, strlen(ex2), &netstring, &netstring_len);
+  base = ex2; base_len = strlen(ex2);
+
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 3); assert(strncmp(netstring, "foo", 3) == 0);
   assert(retval == 0);
 
-  retval = netstring_read(netstring+netstring_len+1, 9, &netstring, &netstring_len);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 0); assert(retval == 0);
 
-  retval = netstring_read(netstring+netstring_len+1, 6, &netstring, &netstring_len);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 3); assert(strncmp(netstring, "bar", 3) == 0);
-  assert(retval == 0);
+  assert(retval == 0); assert(base_len == 0);
 
 
   /* ex3: no comma */
-  retval = netstring_read(ex3, strlen(ex3), &netstring, &netstring_len);
+  base = ex3; base_len = strlen(ex3);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 0); assert(netstring == NULL);
   assert(retval == NETSTRING_ERROR_NO_COMMA);
 
   /* ex4: too short */
-  retval = netstring_read(ex4, strlen(ex4), &netstring, &netstring_len);
+  base = ex4; base_len = strlen(ex4);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 0); assert(netstring == NULL);
   assert(retval == NETSTRING_ERROR_TOO_SHORT);
 
   /* ex5: leading zero */
-  retval = netstring_read(ex5, strlen(ex5), &netstring, &netstring_len);
+  base = ex5; base_len = strlen(ex5);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 0); assert(netstring == NULL);
   assert(retval == NETSTRING_ERROR_LEADING_ZERO);
 
   /* ex6: too long */
-  retval = netstring_read(ex6, strlen(ex6), &netstring, &netstring_len);
+  base = ex6; base_len = strlen(ex6);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 0); assert(netstring == NULL);
   assert(retval == NETSTRING_ERROR_TOO_LONG);
 
   /* ex7: no colon */
-  retval = netstring_read(ex7, strlen(ex7), &netstring, &netstring_len);
+  base = ex7; base_len = strlen(ex7);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 0); assert(netstring == NULL);
   assert(retval == NETSTRING_ERROR_NO_COLON);
 
   /* ex8: no number or colon */
-  retval = netstring_read(ex8, strlen(ex8), &netstring, &netstring_len);
+  base = ex8; base_len = strlen(ex8);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 0); assert(netstring == NULL);
   assert(retval == NETSTRING_ERROR_NO_LENGTH);
 
   /* ex9: no number */
-  retval = netstring_read(ex9, strlen(ex9), &netstring, &netstring_len);
+  base = ex9; base_len = strlen(ex9);
+  retval = netstring_read(&base, &base_len, &netstring, &netstring_len);
   assert(netstring_len == 0); assert(netstring == NULL);
   assert(retval == NETSTRING_ERROR_NO_LENGTH);
 }

@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-int netstring_read(char *buffer, size_t buffer_length,
+int netstring_read(char **pbuffer, size_t *pbuffer_length,
 		   char **netstring_start, size_t *netstring_length);
 
 size_t netstring_buffer_size(size_t data_length);
