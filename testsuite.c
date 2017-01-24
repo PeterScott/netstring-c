@@ -119,11 +119,23 @@ void test_netstring_encode_new(void) {
   free(ns);
 }  
 
+void test_netstring_add(void) {
+  char *list=0;
+
+  netstring_add(&list, "first");
+  netstring_add(&list, "second");
+  netstring_add(&list, "third");
+  assert(strcmp(list, "5:first,6:second,5:third,") == 0);
+  free(list);
+
+}
+
 int main(void) {
   printf("Running test suite...\n");
   test_netstring_read();
   test_netstring_buffer_size();
   test_netstring_encode_new();
+  test_netstring_add();
   printf("All tests passed!\n");
   return 0;
 }
