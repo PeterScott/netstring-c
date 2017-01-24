@@ -22,7 +22,7 @@ All the code is in `netstring.c` and `netstring.h`, and these have no external d
 
 To parse a netstring, use `netstring_read()`.
 
-    int netstring_read(char **buffer, size_t *buffer_length,
+    int netstring_read(char **buffer_start, size_t *buffer_length,
                        char **netstring_start, size_t *netstring_length);
 
 Reads a netstring from a `buffer` of length `buffer_length`. Writes to
@@ -75,6 +75,18 @@ This code provides a convenience function for creating a new netstring:
      size_t netstring_encode_new(char **netstring, char *data, size_t len);
 
 This allocates and creates a netstring containing the first `len` bytes of `data`. This must be manually freed by the client. If `len` is 0 then no data will be read from `data`, and it may be null.
+
+Or with the `netstring_add` function:
+
+     char *netstring=0;  /* we must initialize it to zero */
+
+     netstring_add(&netstring, "first");
+     netstring_add(&netstring, "second");
+     netstring_add(&netstring, "third");
+
+     do_something(netstring);
+     free(netstring);
+
 
 Contributing
 ------------
