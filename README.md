@@ -48,7 +48,7 @@ Example:
       do_something(str, len);
     }
 
-We can replace the comma with a null terminator when reading:
+We can replace the comma with a null terminator when reading (zero copy):
 
     while(netstring_read(&base, &size, &str, &len) == 0) {
       str[len] = 0;
@@ -87,6 +87,9 @@ Or with the `netstring_add` function:
      do_something(netstring);
      free(netstring);
 
+The extended version `netstring_add_ex` accepts a string length as the last argument:
+
+     int netstring_add_ex(char **list, char *str, int len);
 
 Contributing
 ------------

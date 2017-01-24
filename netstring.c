@@ -109,13 +109,13 @@ size_t netstring_encode_new(char **netstring, char *data, size_t len) {
   return num_len + len + 2;
 }
   
-int netstring_add(char **list, char *str) {
+int netstring_add_ex(char **list, char *str, int len) {
   int  size_prev=0, size_next;
   char *ptr;
 
   if (list == 0 || str == 0) return 0;
 
-  size_next = strlen(str) + 12;
+  size_next = len + 12;
 
   if (*list == 0) {
     ptr = malloc(size_next);
@@ -132,4 +132,8 @@ int netstring_add(char **list, char *str) {
   sprintf(ptr, "%d:%s,", strlen(str), str);
   size_next = strlen(str);
   return size_prev + size_next;
+}
+
+int netstring_add(char **list, char *str) {
+  return netstring_add_ex(list, str, strlen(str));
 }
