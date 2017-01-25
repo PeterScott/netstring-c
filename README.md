@@ -18,7 +18,7 @@ Basic API
 
 All the code is in `netstring.c` and `netstring.h`, and these have no external dependencies. To use them, just include them in your application. Include `netstring.h` and link with the C code.
 
-**Parsing netstrings**
+### Parsing netstrings
 
 To parse a netstring, use `netstring_read()`.
 
@@ -62,21 +62,17 @@ netstring. This restriction is in place partially to protect from
 malicious or erroneous input, and partly to be compatible with
 D. J. Bernstein's reference implementation.
 
-**Creating netstrings**
+### Creating netstrings
 
-To create a netstring, there are a few ways to do it. You could do something really simple like this example from [the spec](http://cr.yp.to/proto/netstrings.txt):
+You can create your netstrings manually like in this example:
 
-    if (printf("%lu:", len) < 0) barf();
-    if (fwrite(buf, 1, len, stdout) < len) barf();
-    if (putchar(',') < 0) barf();
+    sprintf(buf, "%lu:%s,", strlen(str), str);
     
-This code provides a convenience function for creating a new netstring:
+This code provides a convenience function for creating netstrings:
 
-     size_t netstring_encode_new(char **netstring, char *data, size_t len);
+     size_t netstring_add(char **netstring, char *data);
 
-This allocates and creates a netstring containing the first `len` bytes of `data`. This must be manually freed by the client. If `len` is 0 then no data will be read from `data`, and it may be null.
-
-Or with the `netstring_add` function:
+Here is how to use it:
 
      char *netstring=0;  /* we must initialize it to zero */
 
@@ -85,11 +81,14 @@ Or with the `netstring_add` function:
      netstring_add(&netstring, "third");
 
      do_something(netstring);
-     free(netstring);
+     
+     free(netstring);    /* we must free after using it */
 
 The extended version `netstring_add_ex` accepts a string length as the last argument:
 
-     int netstring_add_ex(char **list, char *str, int len);
+     size_t netstring_add_ex(char **netstring, char *data, size_t len);
+
+This allocates and creates a netstring containing the first `len` bytes of `data`. If `len` is 0 then no data will be read from `data`, and it may be null.
 
 Message Framing on stream-based connections (sockets, pipes...)
 ---------------------------------------------------------------
