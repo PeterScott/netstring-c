@@ -119,13 +119,35 @@ void test_netstring_encode_new(void) {
   free(ns);
 }  
 
+void test_netstring_add_ex(void) {
+  char *ns=0; size_t bytes;
+
+  bytes = netstring_add_ex(&ns, "foo", 3);
+  assert(ns != NULL); assert(strncmp(ns, "3:foo,", 6) == 0); assert(bytes == 6);
+  free(ns); ns = 0;
+
+  bytes = netstring_add_ex(&ns, NULL, 0);
+  assert(ns != NULL); assert(strncmp(ns, "0:,", 3) == 0); assert(bytes == 3);
+  free(ns); ns = 0;
+
+  bytes = netstring_add_ex(&ns, "hello world!", 12); assert(bytes == 16);
+  assert(ns != NULL); assert(strncmp(ns, "12:hello world!,", 16) == 0);
+  free(ns); ns = 0;
+
+  bytes = netstring_add_ex(&ns, "hello world!", 5); assert(bytes == 8);
+  puts(ns);
+  assert(ns != NULL); assert(strncmp(ns, "5:hello,", 8) == 0);
+  free(ns); ns = 0;
+}
+
 void test_netstring_add(void) {
   char *list=0;
 
   netstring_add(&list, "first");
   netstring_add(&list, "second");
   netstring_add(&list, "third");
-  assert(strcmp(list, "5:first,6:second,5:third,") == 0);
+  netstring_add(&list, "");
+  assert(strcmp(list, "5:first,6:second,5:third,0:,") == 0);
   free(list);
 
 }
@@ -135,6 +157,7 @@ int main(void) {
   test_netstring_read();
   test_netstring_buffer_size();
   test_netstring_encode_new();
+  test_netstring_add_ex();
   test_netstring_add();
   printf("All tests passed!\n");
   return 0;

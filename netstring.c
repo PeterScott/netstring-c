@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <math.h>
 #include "netstring.h"
 
 /* Reads a netstring from a `buffer` of length `buffer_length`. Writes
@@ -78,11 +77,20 @@ int netstring_read(char **pbuffer, size_t *pbuffer_length,
   return 0;
 }
 
+/* count the number of digits (base 10) in a positive integer */
+int numdigits(size_t len) {
+  int n = 1;
+  if ( len >= 100000000 ) { n += 8; len /= 100000000; }
+  if ( len >= 10000     ) { n += 4; len /= 10000; }
+  if ( len >= 100       ) { n += 2; len /= 100; }
+  if ( len >= 10        ) { n += 1; }
+  return n;
+}
+
 /* Return the length, in ASCII characters, of a netstring containing
    `data_length` bytes. */
 size_t netstring_buffer_size(size_t data_length) {
-  if (data_length == 0) return 3;
-  return (size_t)ceil(log10((double)data_length + 1)) + data_length + 2;
+  return (size_t)numdigits(data_length) + data_length + 2;
 }
 
 /* Allocate and create a netstring containing the first `len` bytes of
@@ -98,7 +106,7 @@ size_t netstring_encode_new(char **netstring, char *data, size_t len) {
     ns[1] = ':';
     ns[2] = ',';
   } else {
-    num_len = (size_t)ceil(log10((double)len + 1));
+    num_len = numdigits(len);
     ns = malloc(num_len + len + 2);
     sprintf(ns, "%lu:", (unsigned long)len);
     memcpy(ns + num_len + 1, data, len);
@@ -109,29 +117,40 @@ size_t netstring_encode_new(char **netstring, char *data, size_t len) {
   return num_len + len + 2;
 }
 
-/* returns the netrstring size not including the null terminator */
+/* Allocate and create a netstring containing the first `len` bytes of
+   `data`. This must be manually freed by the client. If `len` is 0
+   then no data will be read from `data`, and it may be NULL.
+   Returns the netstring size not including the null terminator */
 size_t netstring_add_ex(char **list, char *str, size_t len) {
-  size_t size_prev=0, size_next;
+  size_t num_len, size_prev=0, size_next;
   char *ptr;
 
-  if (list == 0 || str == 0) return 0;
+  if (list == 0 || (len > 0 && str == 0)) return 0;
 
-  size_next = len + 12;
+  num_len = numdigits(len);
+  size_next = num_len + len + 2;
 
   if (*list == 0) {
-    ptr = malloc(size_next);
+    ptr = malloc(size_next + 1);
     if (ptr == 0) return 0;
     *list = ptr;
   } else {
     size_prev = strlen(*list);
-    ptr = realloc(*list, size_prev + size_next);
+    ptr = realloc(*list, size_prev + size_next + 1);
     if (ptr == 0) return 0;
     *list = ptr;
     ptr += size_prev;
   }
 
-  sprintf(ptr, "%d:%s,", strlen(str), str);
-  size_next = strlen(ptr);
+  if (len == 0) {
+    strcpy(ptr, "0:,");
+  } else {
+    sprintf(ptr, "%lu:", (unsigned long)len);
+    ptr += num_len + 1;
+    memcpy(ptr, str, len);
+    ptr += len; *ptr = ',';
+    ptr++; *ptr = 0;
+  }
   return size_prev + size_next;
 }
 
