@@ -50,17 +50,23 @@ This allocates and creates a netstring containing the first `len` bytes of `data
 Parsing netstrings
 ------------------
 
-To parse a netstring, use `netstring_read()`.
+To parse a netstring use `netstring_read()`:
 
     int netstring_read(char **buffer_start, size_t *buffer_length,
                        char **netstring_start, size_t *netstring_length);
 
-Reads a netstring from a `buffer` of length `buffer_length`. Writes to
-`netstring_start` a pointer to the beginning of the string in the
-buffer, and to `netstring_length` the length of the string. Does not
-allocate any memory. If it reads successfully, then it returns 0. If
-there is an error, then the return value will be negative. The error
-values are:
+It reads a netstring from `buffer_start` of initial `buffer_length` and writes
+to `netstring_start` a pointer to the beginning of the string in the
+buffer and to `netstring_length` the length of the string. It also updates
+the `buffer_start` to the start of the next netstring item and `buffer_length`
+to the number of remaining bytes not processed in the buffer.
+
+It does not allocate any memory.
+
+### Return Value
+
+If it reads successfully then it returns 0. If there is an error then the
+return value will be negative. The error values are:
 
     NETSTRING_ERROR_TOO_LONG      More than 999999999 bytes in a field
     NETSTRING_ERROR_NO_COLON      No colon was found after the number
@@ -69,7 +75,7 @@ values are:
     NETSTRING_ERROR_LEADING_ZERO  Leading zeros are not allowed
     NETSTRING_ERROR_NO_LENGTH     Length not given at start of netstring
 
-Example:
+Usage Example:
 
     char  *str, *base = buffer;
     size_t len,  size = bytes_read;
@@ -86,8 +92,8 @@ We can replace the comma with a null terminator when reading (zero copy):
       str[len] = ',';   /* and optionally restore it */
     }
 
-If you're sending messages with more than 999999999 bytes -- about 2
-GB -- then you probably should not be doing so in the form of a single
+If you're sending messages with more than 999999999 bytes (about 2
+GB) then you probably should not be doing so in the form of a single
 netstring. This restriction is in place partially to protect from
 malicious or erroneous input, and partly to be compatible with
 D. J. Bernstein's reference implementation.
