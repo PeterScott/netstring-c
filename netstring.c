@@ -31,7 +31,7 @@
       if (netstring_read("3:foo,", 6, &str, &len) < 0) explode_and_die();
  */
 int netstring_read(char **pbuffer, size_t *pbuffer_length,
-		   char **netstring_start, size_t *netstring_length) {
+                   char **netstring_start, size_t *netstring_length) {
   int i;
   size_t len = 0;
   char *buffer = *pbuffer;
@@ -108,9 +108,10 @@ size_t netstring_encode_new(char **netstring, char *data, size_t len) {
   *netstring = ns;
   return num_len + len + 2;
 }
-  
-int netstring_add_ex(char **list, char *str, int len) {
-  int  size_prev=0, size_next;
+
+/* returns the netrstring size not including the null terminator */
+size_t netstring_add_ex(char **list, char *str, size_t len) {
+  size_t size_prev=0, size_next;
   char *ptr;
 
   if (list == 0 || str == 0) return 0;
@@ -130,10 +131,10 @@ int netstring_add_ex(char **list, char *str, int len) {
   }
 
   sprintf(ptr, "%d:%s,", strlen(str), str);
-  size_next = strlen(str);
+  size_next = strlen(ptr);
   return size_prev + size_next;
 }
 
-int netstring_add(char **list, char *str) {
+size_t netstring_add(char **list, char *str) {
   return netstring_add_ex(list, str, strlen(str));
 }

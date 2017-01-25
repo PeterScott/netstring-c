@@ -3,8 +3,8 @@
 
 #include <string.h>
 
-int netstring_add(char **list, char *str);
-int netstring_add_ex(char **list, char *str, int len);
+size_t netstring_add(char **netstring, char *data);
+size_t netstring_add_ex(char **netstring, char *data, size_t len);
 
 size_t netstring_encode_new(char **netstring, char *data, size_t len);
 
