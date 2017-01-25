@@ -1,5 +1,5 @@
-Netstring parsing
-=================
+Netstring for C
+===============
 
 A [netstring](http://en.wikipedia.org/wiki/Netstring) is a way of encoding a sequence of bytes for transmission over a network, or for serialization. They're very easy to work with. They encode the data's length, and can be concatenated trivially. The format was [defined by D. J. Bernstein](http://cr.yp.to/proto/netstrings.txt) and is used in various software. Examples of netstrings:
 
@@ -18,7 +18,37 @@ Basic API
 
 All the code is in `netstring.c` and `netstring.h`, and these have no external dependencies. To use them, just include them in your application. Include `netstring.h` and link with the C code.
 
-### Parsing netstrings
+Creating netstrings
+-------------------
+
+You can create your netstrings manually like in this example:
+
+    sprintf(buf, "%lu:%s,", strlen(str), str);
+    
+This code provides a convenience function for creating netstrings:
+
+     size_t netstring_add(char **netstring, char *data);
+
+Here is how to use it:
+
+     char *netstring=0;  /* we must initialize it to zero */
+
+     netstring_add(&netstring, "first");
+     netstring_add(&netstring, "second");
+     netstring_add(&netstring, "third");
+
+     do_something(netstring);
+     
+     free(netstring);    /* we must free after using it */
+
+The extended version `netstring_add_ex` accepts a string length as the last argument:
+
+     size_t netstring_add_ex(char **netstring, char *data, size_t len);
+
+This allocates and creates a netstring containing the first `len` bytes of `data`. If `len` is 0 then no data will be read from `data`, and it may be null.
+
+Parsing netstrings
+------------------
 
 To parse a netstring, use `netstring_read()`.
 
@@ -61,34 +91,6 @@ GB -- then you probably should not be doing so in the form of a single
 netstring. This restriction is in place partially to protect from
 malicious or erroneous input, and partly to be compatible with
 D. J. Bernstein's reference implementation.
-
-### Creating netstrings
-
-You can create your netstrings manually like in this example:
-
-    sprintf(buf, "%lu:%s,", strlen(str), str);
-    
-This code provides a convenience function for creating netstrings:
-
-     size_t netstring_add(char **netstring, char *data);
-
-Here is how to use it:
-
-     char *netstring=0;  /* we must initialize it to zero */
-
-     netstring_add(&netstring, "first");
-     netstring_add(&netstring, "second");
-     netstring_add(&netstring, "third");
-
-     do_something(netstring);
-     
-     free(netstring);    /* we must free after using it */
-
-The extended version `netstring_add_ex` accepts a string length as the last argument:
-
-     size_t netstring_add_ex(char **netstring, char *data, size_t len);
-
-This allocates and creates a netstring containing the first `len` bytes of `data`. If `len` is 0 then no data will be read from `data`, and it may be null.
 
 Message Framing on stream-based connections (sockets, pipes...)
 ---------------------------------------------------------------
