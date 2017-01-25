@@ -27,7 +27,7 @@
    D. J. Bernstein's reference implementation.
 
    Example:
-      if (netstring_read("3:foo,", 6, &str, &len) < 0) explode_and_die();
+      if (netstring_read(&buf, &buflen, &str, &len) < 0) failed();
  */
 int netstring_read(char **pbuffer, size_t *pbuffer_length,
                    char **netstring_start, size_t *netstring_length) {
@@ -95,50 +95,26 @@ size_t netstring_buffer_size(size_t data_length) {
 
 /* Allocate and create a netstring containing the first `len` bytes of
    `data`. This must be manually freed by the client. If `len` is 0
-   then no data will be read from `data`, and it may be NULL. */
-size_t netstring_encode_new(char **netstring, char *data, size_t len) {
-  char *ns;
-  size_t num_len = 1;
-
-  if (len == 0) {
-    ns = malloc(3);
-    ns[0] = '0';
-    ns[1] = ':';
-    ns[2] = ',';
-  } else {
-    num_len = numdigits(len);
-    ns = malloc(num_len + len + 2);
-    sprintf(ns, "%lu:", (unsigned long)len);
-    memcpy(ns + num_len + 1, data, len);
-    ns[num_len + len + 1] = ',';
-  }
-
-  *netstring = ns;
-  return num_len + len + 2;
-}
-
-/* Allocate and create a netstring containing the first `len` bytes of
-   `data`. This must be manually freed by the client. If `len` is 0
    then no data will be read from `data`, and it may be NULL.
    Returns the netstring size not including the null terminator */
-size_t netstring_add_ex(char **list, char *str, size_t len) {
+size_t netstring_add_ex(char **netstring, char *data, size_t len) {
   size_t num_len, size_prev=0, size_next;
   char *ptr;
 
-  if (list == 0 || (len > 0 && str == 0)) return 0;
+  if (netstring == 0 || (len > 0 && data == 0)) return 0;
 
   num_len = numdigits(len);
   size_next = num_len + len + 2;
 
-  if (*list == 0) {
+  if (*netstring == 0) {
     ptr = malloc(size_next + 1);
     if (ptr == 0) return 0;
-    *list = ptr;
+    *netstring = ptr;
   } else {
-    size_prev = strlen(*list);
-    ptr = realloc(*list, size_prev + size_next + 1);
+    size_prev = strlen(*netstring);
+    ptr = realloc(*netstring, size_prev + size_next + 1);
     if (ptr == 0) return 0;
-    *list = ptr;
+    *netstring = ptr;
     ptr += size_prev;
   }
 
@@ -147,13 +123,13 @@ size_t netstring_add_ex(char **list, char *str, size_t len) {
   } else {
     sprintf(ptr, "%lu:", (unsigned long)len);
     ptr += num_len + 1;
-    memcpy(ptr, str, len);
+    memcpy(ptr, data, len);
     ptr += len; *ptr = ',';
     ptr++; *ptr = 0;
   }
   return size_prev + size_next;
 }
 
-size_t netstring_add(char **list, char *str) {
-  return netstring_add_ex(list, str, strlen(str));
+size_t netstring_add(char **netstring, char *data) {
+  return netstring_add_ex(netstring, data, strlen(data));
 }

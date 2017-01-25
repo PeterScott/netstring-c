@@ -6,8 +6,6 @@
 size_t netstring_add(char **netstring, char *data);
 size_t netstring_add_ex(char **netstring, char *data, size_t len);
 
-size_t netstring_encode_new(char **netstring, char *data, size_t len);
-
 int netstring_read(char **buffer_start, size_t *buffer_length,
                    char **netstring_start, size_t *netstring_length);
 

@@ -103,22 +103,6 @@ void test_netstring_buffer_size(void) {
   assert(netstring_buffer_size(12345) == 12345 + 5 + 2);
 }
 
-void test_netstring_encode_new(void) {
-  char *ns; size_t bytes;
-
-  bytes = netstring_encode_new(&ns, "foo", 3);
-  assert(ns != NULL); assert(strncmp(ns, "3:foo,", 6) == 0); assert(bytes == 6);
-  free(ns);
-
-  bytes = netstring_encode_new(&ns, NULL, 0);
-  assert(ns != NULL); assert(strncmp(ns, "0:,", 3) == 0); assert(bytes == 3);
-  free(ns);
-
-  bytes = netstring_encode_new(&ns, "hello world!", 12); assert(bytes == 16);
-  assert(ns != NULL); assert(strncmp(ns, "12:hello world!,", 16) == 0);
-  free(ns);
-}  
-
 void test_netstring_add_ex(void) {
   char *ns=0; size_t bytes;
 
@@ -135,7 +119,6 @@ void test_netstring_add_ex(void) {
   free(ns); ns = 0;
 
   bytes = netstring_add_ex(&ns, "hello world!", 5); assert(bytes == 8);
-  puts(ns);
   assert(ns != NULL); assert(strncmp(ns, "5:hello,", 8) == 0);
   free(ns); ns = 0;
 }
@@ -156,7 +139,6 @@ int main(void) {
   printf("Running test suite...\n");
   test_netstring_read();
   test_netstring_buffer_size();
-  test_netstring_encode_new();
   test_netstring_add_ex();
   test_netstring_add();
   printf("All tests passed!\n");
