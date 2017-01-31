@@ -24,27 +24,35 @@ Creating netstrings
 
 You can create your netstrings manually like in this example:
 
-    sprintf(buf, "%lu:%s,", strlen(str), str);
+```C
+sprintf(buf, "%lu:%s,", strlen(str), str);
+```
     
 This code provides a convenience function for creating netstrings:
 
-     size_t netstring_add(char **netstring, char *data);
+```C
+size_t netstring_add(char **netstring, char *data);
+```
 
 Here is how to use it:
 
-     char *netstring=0;  /* we must initialize it to zero */
+```C
+char *netstring=0;  /* we must initialize it to zero */
 
-     netstring_add(&netstring, "first");
-     netstring_add(&netstring, "second");
-     netstring_add(&netstring, "third");
+netstring_add(&netstring, "first");
+netstring_add(&netstring, "second");
+netstring_add(&netstring, "third");
 
-     do_something(netstring);
-     
-     free(netstring);    /* we must free after using it */
+do_something(netstring);
+
+free(netstring);    /* we must free after using it */
+```
 
 The extended version `netstring_add_ex` accepts a string length as the last argument:
 
-     size_t netstring_add_ex(char **netstring, char *data, size_t len);
+```C
+size_t netstring_add_ex(char **netstring, char *data, size_t len);
+```
 
 This allocates and creates a netstring containing the first `len` bytes of `data`. If `len` is 0 then no data will be read from `data`, and it may be null.
 
@@ -53,8 +61,10 @@ Parsing netstrings
 
 To parse a netstring use `netstring_read()`:
 
-    int netstring_read(char **buffer_start, size_t *buffer_length,
-                       char **netstring_start, size_t *netstring_length);
+```C
+int netstring_read(char **buffer_start, size_t *buffer_length,
+                   char **netstring_start, size_t *netstring_length);
+```
 
 It reads a netstring from `buffer_start` of initial `buffer_length` and writes
 to `netstring_start` a pointer to the beginning of the string in the
@@ -78,20 +88,24 @@ return value will be negative. The error values are:
 
 Usage Example:
 
-    char  *str, *base = buffer;
-    size_t len,  size = bytes_read;
+```C
+char  *str, *base = buffer;
+size_t len,  size = bytes_read;
 
-    while(netstring_read(&base, &size, &str, &len) == 0) {
-      do_something(str, len);
-    }
+while(netstring_read(&base, &size, &str, &len) == 0) {
+  do_something(str, len);
+}
+```
 
 We can replace the comma with a null terminator when reading (zero copy):
 
-    while(netstring_read(&base, &size, &str, &len) == 0) {
-      str[len] = 0;
-      puts(str);
-      str[len] = ',';   /* and optionally restore it */
-    }
+```C
+while(netstring_read(&base, &size, &str, &len) == 0) {
+  str[len] = 0;
+  puts(str);
+  str[len] = ',';   /* and optionally restore it */
+}
+```
 
 If you're sending messages with more than 999999999 bytes (about 2
 GB) then you probably should not be doing so in the form of a single
@@ -105,27 +119,27 @@ Message Framing on stream-based connections (sockets, pipes...)
 On stream-based connections the messages can arrive coalesced or fragmented.
 
 Here is an example of reading those messages using netstring for message framing:
+```C
+char buffer[1024], *buffer_base, *str;
+int bytes_read, buffer_used = 0, len;
 
-    char buffer[1024], *buffer_base, *str;
-    int bytes_read, buffer_used = 0, len;
+while(1) {
+  /* read data from socket */
+  bytes_read = recv(sock, &buffer[buffer_used], sizeof(buffer) - buffer_used);
+  if (bytes_read < 0) break; if (bytes_read == 0) continue;
+  buffer_used += bytes_read;
 
-    while(1) {
-        /* read data from socket */
-        bytes_read = recv(sock, &buffer[buffer_used], sizeof(buffer) - buffer_used);
-        if (bytes_read < 0) break; if (bytes_read == 0) continue;
-        buffer_used += bytes_read;
+  /* parse the strings from the read buffer */
+  buffer_base = buffer;
+  while(netstring_read(&buffer_base, &buffer_used, &str, &len) == 0) {
+    do_something(str, len);
+  }
 
-        /* parse the strings from the read buffer */
-        buffer_base = buffer;
-        while(netstring_read(&buffer_base, &buffer_used, &str, &len) == 0) {
-          do_something(str, len);
-        }
-
-        /* if there are remaining bytes, move to the beggining of buffer */
-        if (buffer_base > buffer && buffer_used > 0)
-          memmove(buffer, buffer_base, buffer_used);
-    }
-
+  /* if there are remaining bytes, move to the beggining of buffer */
+  if (buffer_base > buffer && buffer_used > 0)
+    memmove(buffer, buffer_base, buffer_used);
+}
+```
 Note: this example is lacking error checking from netstring_read function and it does not allocate memory for bigger messages.
 
 Contributing
