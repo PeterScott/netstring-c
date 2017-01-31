@@ -1,5 +1,6 @@
 Netstring for C
 ===============
+[![Build Status](https://travis-ci.org/liteserver/netstring-c.svg?branch=master)](https://travis-ci.org/liteserver/netstring-c)
 
 A [netstring](http://en.wikipedia.org/wiki/Netstring) is a way of encoding a sequence of bytes for transmission over a network, or for serialization. They're very easy to work with. They encode the data's length, and can be concatenated trivially. The format was [defined by D. J. Bernstein](http://cr.yp.to/proto/netstrings.txt) and is used in various software. Examples of netstrings:
 
