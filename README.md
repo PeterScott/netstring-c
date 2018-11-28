@@ -142,6 +142,25 @@ while(1) {
 ```
 Note: this example is lacking error checking from netstring_read function and it does not allocate memory for bigger messages.
 
+Additional Functions
+--------------------
+
+### netstring_list_size
+
+Retrieves the size of the netstring list (concatenated netstrings) discarding trailing spaces.
+
+```C
+int netstring_list_size(char *buffer, size_t size, size_t *ptotal);
+```
+
+### netstring_list_count
+
+Retrieves the number of items in a netstring list.
+
+```C
+int netstring_list_count(char *buffer, size_t size, int *pcount);
+```
+
 Contributing
 ------------
 
