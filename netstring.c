@@ -78,7 +78,7 @@ int netstring_read(char **pbuffer, size_t *pbuffer_length,
 }
 
 /* Retrieves the size of the concatenated netstrings */
-int netstring_list_size(char *buffer, int size, size_t *ptotal) {
+int netstring_list_size(char *buffer, size_t size, size_t *ptotal) {
   char  *str, *base = buffer;
   size_t len,  remaining = size;
   int rc;
@@ -92,7 +92,7 @@ int netstring_list_size(char *buffer, int size, size_t *ptotal) {
 }
 
 /* Retrieves the number of concatenated netstrings */
-int netstring_list_count(char *buffer, int size, int *pcount) {
+int netstring_list_count(char *buffer, size_t size, int *pcount) {
   char  *str, *base = buffer;
   size_t len,  remaining = size;
   int rc, count = 0;
