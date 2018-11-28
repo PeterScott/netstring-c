@@ -11,6 +11,9 @@ int netstring_read(char **buffer_start, size_t *buffer_length,
 
 size_t netstring_buffer_size(size_t data_length);
 
+int netstring_list_size(char *buffer, int size, size_t *ptotal);
+int netstring_list_count(char *buffer, int size, int *pcount);
+
 /* Errors that can occur during netstring parsing */
 #define NETSTRING_ERROR_TOO_LONG     -1
 #define NETSTRING_ERROR_NO_COLON     -2

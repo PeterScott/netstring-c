@@ -77,6 +77,35 @@ int netstring_read(char **pbuffer, size_t *pbuffer_length,
   return 0;
 }
 
+/* Retrieves the size of the concatenated netstrings */
+int netstring_list_size(char *buffer, int size, size_t *ptotal) {
+  char  *str, *base = buffer;
+  size_t len,  remaining = size;
+  int rc;
+
+  while( remaining>0 && (rc=netstring_read(&base, &remaining, &str, &len))==0 ){
+  }
+
+  if( rc==NETSTRING_ERROR_NO_LENGTH || rc==NETSTRING_ERROR_TOO_SHORT ) rc = 0;
+  *ptotal = size - remaining;
+  return rc;
+}
+
+/* Retrieves the number of concatenated netstrings */
+int netstring_list_count(char *buffer, int size, int *pcount) {
+  char  *str, *base = buffer;
+  size_t len,  remaining = size;
+  int rc, count = 0;
+
+  while( remaining>0 && (rc=netstring_read(&base, &remaining, &str, &len))==0 ){
+    count++;
+  }
+
+  if( rc==NETSTRING_ERROR_NO_LENGTH || rc==NETSTRING_ERROR_TOO_SHORT ) rc = 0;
+  *pcount = count;
+  return rc;
+}
+
 /* count the number of digits (base 10) in a positive integer */
 int numdigits(size_t len) {
   int n = 1;

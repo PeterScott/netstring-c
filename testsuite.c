@@ -9,6 +9,7 @@
 /* Good examples */
 char ex1[] = "12:hello world!,";
 char ex2[] = "3:foo,0:,3:bar,";
+char exb[] = "3:foo,0:,3:bar,  ";
 
 /* Bad examples */
 char ex3[] = "12:hello world! "; /* No comma */
@@ -94,6 +95,26 @@ void test_netstring_read(void) {
   assert(retval == NETSTRING_ERROR_NO_LENGTH);
 }
 
+void test_netstring_list_size(void) {
+  size_t size=0;
+  assert(netstring_list_size(ex1, strlen(ex1), &size) == 0);
+  assert(size == strlen(ex1));
+  assert(netstring_list_size(ex2, strlen(ex2), &size) == 0);
+  assert(size == strlen(ex2));
+  assert(netstring_list_size(exb, strlen(exb), &size) == 0);
+  assert(size == strlen(ex2));
+}
+
+void test_netstring_list_count(void) {
+  int count=0;
+  assert(netstring_list_count(ex1, strlen(ex1), &count) == 0);
+  assert(count == 1);
+  assert(netstring_list_count(ex2, strlen(ex2), &count) == 0);
+  assert(count == 3);
+  assert(netstring_list_count(exb, strlen(exb), &count) == 0);
+  assert(count == 3);
+}
+
 void test_netstring_buffer_size(void) {
   assert(netstring_buffer_size(0) == 3);
   assert(netstring_buffer_size(1) == 4);
@@ -138,6 +159,8 @@ void test_netstring_add(void) {
 int main(void) {
   printf("Running test suite...\n");
   test_netstring_read();
+  test_netstring_list_size();
+  test_netstring_list_count();
   test_netstring_buffer_size();
   test_netstring_add_ex();
   test_netstring_add();
