@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <math.h>
 #include "netstring.h"
 
 /* Reads a netstring from a `buffer` of length `buffer_length`. Writes
@@ -28,12 +27,14 @@
    D. J. Bernstein's reference implementation.
 
    Example:
-      if (netstring_read("3:foo,", 6, &str, &len) < 0) explode_and_die();
+      if (netstring_read(&buf, &buflen, &str, &len) < 0) failed();
  */
-int netstring_read(char *buffer, size_t buffer_length,
-		   char **netstring_start, size_t *netstring_length) {
+int netstring_read(char **pbuffer, size_t *pbuffer_length,
+                   char **netstring_start, size_t *netstring_length) {
   int i;
   size_t len = 0;
+  char *buffer = *pbuffer;
+  size_t buffer_length = *pbuffer_length;
 
   /* Write default values for outputs */
   *netstring_start = NULL; *netstring_length = 0;
@@ -64,41 +65,100 @@ int netstring_read(char *buffer, size_t buffer_length,
   /* Read the colon */
   if (buffer[i++] != ':') return NETSTRING_ERROR_NO_COLON;
   
-  /* Test for the trailing comma, and set the return values */
+  /* Test for the trailing comma */
   if (buffer[i + len] != ',') return NETSTRING_ERROR_NO_COMMA;
-  *netstring_start = &buffer[i]; *netstring_length = len;
+
+  /* Set the return values */
+  *netstring_start = &buffer[i];
+  *netstring_length = len;
+  *pbuffer = *netstring_start + len + 1;
+  *pbuffer_length = buffer_length - (i + len + 1);
 
   return 0;
+}
+
+/* Retrieves the size of the concatenated netstrings */
+int netstring_list_size(char *buffer, size_t size, size_t *ptotal) {
+  char  *str, *base = buffer;
+  size_t len,  remaining = size;
+  int rc;
+
+  while( remaining>0 && (rc=netstring_read(&base, &remaining, &str, &len))==0 ){
+  }
+
+  if( rc==NETSTRING_ERROR_NO_LENGTH || rc==NETSTRING_ERROR_TOO_SHORT ) rc = 0;
+  *ptotal = size - remaining;
+  return rc;
+}
+
+/* Retrieves the number of concatenated netstrings */
+int netstring_list_count(char *buffer, size_t size, int *pcount) {
+  char  *str, *base = buffer;
+  size_t len,  remaining = size;
+  int rc, count = 0;
+
+  while( remaining>0 && (rc=netstring_read(&base, &remaining, &str, &len))==0 ){
+    count++;
+  }
+
+  if( rc==NETSTRING_ERROR_NO_LENGTH || rc==NETSTRING_ERROR_TOO_SHORT ) rc = 0;
+  *pcount = count;
+  return rc;
+}
+
+/* count the number of digits (base 10) in a positive integer */
+int numdigits(size_t len) {
+  int n = 1;
+  if ( len >= 100000000 ) { n += 8; len /= 100000000; }
+  if ( len >= 10000     ) { n += 4; len /= 10000; }
+  if ( len >= 100       ) { n += 2; len /= 100; }
+  if ( len >= 10        ) { n += 1; }
+  return n;
 }
 
 /* Return the length, in ASCII characters, of a netstring containing
    `data_length` bytes. */
 size_t netstring_buffer_size(size_t data_length) {
-  if (data_length == 0) return 3;
-  return (size_t)ceil(log10((double)data_length + 1)) + data_length + 2;
+  return (size_t)numdigits(data_length) + data_length + 2;
 }
 
 /* Allocate and create a netstring containing the first `len` bytes of
    `data`. This must be manually freed by the client. If `len` is 0
-   then no data will be read from `data`, and it may be NULL. */
-size_t netstring_encode_new(char **netstring, char *data, size_t len) {
-  char *ns;
-  size_t num_len = 1;
+   then no data will be read from `data`, and it may be NULL.
+   Returns the netstring size not including the null terminator */
+size_t netstring_add_ex(char **netstring, char *data, size_t len) {
+  size_t num_len, size_prev=0, size_next;
+  char *ptr;
 
-  if (len == 0) {
-    ns = malloc(3);
-    ns[0] = '0';
-    ns[1] = ':';
-    ns[2] = ',';
+  if (netstring == 0 || (len > 0 && data == 0)) return 0;
+
+  num_len = numdigits(len);
+  size_next = num_len + len + 2;
+
+  if (*netstring == 0) {
+    ptr = malloc(size_next + 1);
+    if (ptr == 0) return 0;
+    *netstring = ptr;
   } else {
-    num_len = (size_t)ceil(log10((double)len + 1));
-    ns = malloc(num_len + len + 2);
-    sprintf(ns, "%lu:", (unsigned long)len);
-    memcpy(ns + num_len + 1, data, len);
-    ns[num_len + len + 1] = ',';
+    size_prev = strlen(*netstring);
+    ptr = realloc(*netstring, size_prev + size_next + 1);
+    if (ptr == 0) return 0;
+    *netstring = ptr;
+    ptr += size_prev;
   }
 
-  *netstring = ns;
-  return num_len + len + 2;
+  if (len == 0) {
+    strcpy(ptr, "0:,");
+  } else {
+    sprintf(ptr, "%lu:", (unsigned long)len);
+    ptr += num_len + 1;
+    memcpy(ptr, data, len);
+    ptr += len; *ptr = ',';
+    ptr++; *ptr = 0;
+  }
+  return size_prev + size_next;
 }
-  
+
+size_t netstring_add(char **netstring, char *data) {
+  return netstring_add_ex(netstring, data, strlen(data));
+}

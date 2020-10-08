@@ -1,5 +1,4 @@
 CFLAGS = -O2 -Wall
-LDFLAGS= -lm 
 
 .PHONY: test clean
 
