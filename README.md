@@ -135,7 +135,7 @@ while(1) {
     do_something(str, len);
   }
 
-  /* if there are remaining bytes, move to the beggining of buffer */
+  /* if there are remaining bytes, move to the beginning of buffer */
   if (buffer_base > buffer && buffer_used > 0)
     memmove(buffer, buffer_base, buffer_used);
 }
